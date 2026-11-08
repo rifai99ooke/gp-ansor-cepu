@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Providers;
 
+use App\Services\PublicMediaCleanup;
 use Carbon\Carbon;
 use Carbon\CarbonImmutable;
 use Filament\Actions\CreateAction;
@@ -30,6 +31,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        app(PublicMediaCleanup::class)->registerModelEvents();
+
         Model::preventLazyLoading(! $this->app->isProduction());
 
         Blade::component('components.icon', 'icon');

@@ -13,7 +13,9 @@ use Throwable;
 
 class GoogleFormSchemaService
 {
-    private const SCHEMA_CACHE_PREFIX = 'google_form_schema_v4_';
+    private const SCHEMA_CACHE_PREFIX = 'google_form_schema_v5_';
+
+    private const EMAIL_COLLECTION_DISABLED = 1;
 
     /**
      * Extract form schema (title, description, fields) from a RegistrationForm's Google Form URL.
@@ -108,6 +110,10 @@ class GoogleFormSchemaService
         }
 
         $formMeta = $data[1];
+        if ($this->usesUnsupportedEmailCollection($formMeta)) {
+            return null;
+        }
+
         $title = isset($formMeta[8]) && is_string($formMeta[8]) ? trim($formMeta[8]) : null;
         $description = isset($formMeta[0]) && is_string($formMeta[0]) ? trim($formMeta[0]) : null;
         $rawItems = is_array($formMeta[1] ?? null) ? $formMeta[1] : [];
@@ -151,6 +157,14 @@ class GoogleFormSchemaService
             $options = [];
             if (isset($firstInput[1]) && is_array($firstInput[1])) {
                 foreach ($firstInput[1] as $opt) {
+                    if (
+                        is_array($opt)
+                        && in_array($typeCode, [2, 4], true)
+                        && ! in_array($opt[4] ?? null, [null, false, 0], true)
+                    ) {
+                        return null;
+                    }
+
                     if (is_array($opt) && isset($opt[0]) && is_string($opt[0]) && trim($opt[0]) !== '') {
                         $options[] = trim($opt[0]);
                     }
@@ -182,6 +196,28 @@ class GoogleFormSchemaService
             'action_url' => $sourceUrl ? $this->buildFormResponseUrl($sourceUrl) : null,
             'fields' => $fields,
         ];
+    }
+
+    /**
+     * Google stores email collection outside the question list, in settings block 10.
+     * Mode 6 uses 1 for disabled, 2 for verified accounts, and 3 for responder input;
+     * older forms use the boolean flag at 4. Unknown settings require the original form.
+     *
+     * @param  array<int, mixed>  $formMeta
+     */
+    private function usesUnsupportedEmailCollection(array $formMeta): bool
+    {
+        $settings = $formMeta[10] ?? null;
+        if ($settings === null) {
+            return false;
+        }
+
+        if (! is_array($settings)) {
+            return true;
+        }
+
+        return ! in_array($settings[4] ?? null, [null, false, 0], true)
+            || ! in_array($settings[6] ?? null, [null, self::EMAIL_COLLECTION_DISABLED], true);
     }
 
     /**
@@ -322,12 +358,6 @@ class GoogleFormSchemaService
      */
     private function resolveTextSubtype(string $label, array $firstInput): string
     {
-        $lowerLabel = mb_strtolower($label);
-
-        if (str_contains($lowerLabel, 'email') || str_contains($lowerLabel, 'pos-el') || str_contains($lowerLabel, 'surel')) {
-            return 'email';
-        }
-
         // Check Google Form validation rule [2, 102] (Email validation)
         $validations = $firstInput[4] ?? null;
         if (is_array($validations)) {
@@ -337,6 +367,8 @@ class GoogleFormSchemaService
                 }
             }
         }
+
+        $lowerLabel = mb_strtolower($label);
 
         if (
             str_contains($lowerLabel, 'telepon')

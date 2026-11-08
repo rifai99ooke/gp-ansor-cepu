@@ -17,6 +17,7 @@ use Filament\Schemas\Components\Tabs;
 use Filament\Schemas\Components\Tabs\Tab;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Locked;
 
 /**
@@ -267,9 +268,11 @@ class SettingsPage extends Page
             $state['map_embed_url'] = Setting::normalizeMapEmbedUrl($state['map_embed_url']);
         }
 
-        foreach ($state as $key => $value) {
-            Setting::setValue((string) $key, $value);
-        }
+        DB::transaction(function () use ($state): void {
+            foreach ($state as $key => $value) {
+                Setting::setValue((string) $key, $value);
+            }
+        });
 
         $this->savedData = $this->data;
 

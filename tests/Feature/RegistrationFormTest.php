@@ -444,6 +444,7 @@ class RegistrationFormTest extends TestCase
             'fallback schema' => ['google_form_schema_'],
             'schema without question compatibility checks' => ['google_form_schema_v2_'],
             'schema without date and time compatibility checks' => ['google_form_schema_v3_'],
+            'schema without email collection and other option compatibility checks' => ['google_form_schema_v4_'],
         ];
     }
 

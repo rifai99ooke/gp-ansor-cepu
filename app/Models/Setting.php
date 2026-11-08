@@ -37,10 +37,16 @@ class Setting extends Model
             }
 
             static::clearCache();
+            $setting->getConnection()->afterCommit(static function (): void {
+                static::clearCache();
+            });
         });
 
-        static::deleted(function (): void {
+        static::deleted(function (Setting $setting): void {
             static::clearCache();
+            $setting->getConnection()->afterCommit(static function (): void {
+                static::clearCache();
+            });
         });
     }
 

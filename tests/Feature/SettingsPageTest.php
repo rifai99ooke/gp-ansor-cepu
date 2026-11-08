@@ -7,18 +7,34 @@ namespace Tests\Feature;
 use App\Filament\Pages\SettingsPage;
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\ImageService;
 use DOMDocument;
 use DOMXPath;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Livewire\Livewire;
+use Mockery\MockInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use Tests\TestCase;
 
 class SettingsPageTest extends TestCase
 {
     use RefreshDatabase;
+
+    public function test_settings_cache_is_invalidated_after_transaction_commit(): void
+    {
+        Setting::setValue('site_name', 'Nama Lama');
+
+        DB::transaction(function (): void {
+            Setting::setValue('site_name', 'Nama Baru');
+            Cache::put(Setting::CACHE_KEY, ['site_name' => 'Nama Lama'], 600);
+        });
+
+        $this->assertSame('Nama Baru', setting('site_name'));
+    }
 
     public function test_admin_can_save_structured_address_used_by_public_metadata(): void
     {
@@ -109,6 +125,28 @@ class SettingsPageTest extends TestCase
             Setting::getValue('site_favicon'),
         ]);
         $this->assertSame($page->get('data'), $page->get('savedData'));
+    }
+
+    public function test_swapping_logo_and_favicon_preserves_both_files(): void
+    {
+        Storage::fake('public');
+        $this->mock(ImageService::class, function (MockInterface $mock): void {
+            $mock->shouldReceive('generateWebpVariants')->andReturnUsing(fn (string $path): string => $path);
+        });
+        $this->actingAs(User::factory()->create());
+        Storage::disk('public')->put('branding/logo.png', 'logo');
+        Storage::disk('public')->put('branding/favicon.png', 'favicon');
+        Setting::setValue('site_logo', 'branding/logo.png');
+        Setting::setValue('site_favicon', 'branding/favicon.png');
+
+        Livewire::test(SettingsPage::class)
+            ->fillForm(['site_logo' => ['branding/favicon.png'], 'site_favicon' => ['branding/logo.png']])
+            ->call('save')
+            ->assertHasNoFormErrors();
+
+        $this->assertDatabaseHas('settings', ['key' => 'site_logo', 'value' => 'branding/favicon.png']);
+        $this->assertDatabaseHas('settings', ['key' => 'site_favicon', 'value' => 'branding/logo.png']);
+        Storage::disk('public')->assertExists(['branding/logo.png', 'branding/favicon.png']);
     }
 
     /**

@@ -28,6 +28,9 @@ trait HasUniqueSlug
     public static function generateUniqueSlug(string $source, ?int $ignoreId = null, string $column = 'slug'): string
     {
         $baseSlug = Str::slug($source);
+        if ($baseSlug === '') {
+            $baseSlug = 'item';
+        }
         $slug = $baseSlug;
         $counter = 2;
 

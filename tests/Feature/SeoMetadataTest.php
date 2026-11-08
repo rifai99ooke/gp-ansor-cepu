@@ -18,6 +18,16 @@ class SeoMetadataTest extends TestCase
 {
     use RefreshDatabase;
 
+    public function test_robots_advertises_the_sitemap_on_the_public_domain(): void
+    {
+        $this->get('https://ansor.example/robots.txt')
+            ->assertOk()
+            ->assertHeader('Content-Type', 'text/plain; charset=UTF-8')
+            ->assertContent("User-agent: *\nDisallow: /admin\n\nSitemap: https://ansor.example/sitemap.xml\n");
+
+        $this->assertFileDoesNotExist(public_path('robots.txt'));
+    }
+
     #[DataProvider('paginatedListings')]
     public function test_paginated_listings_use_a_canonical_for_the_current_page(string $route, string $model, int $recordCount): void
     {

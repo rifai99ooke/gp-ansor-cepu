@@ -23,6 +23,7 @@ use Filament\Schemas\Components\Form;
 use Filament\Schemas\Components\Section;
 use Filament\Schemas\Schema;
 use Filament\Support\Icons\Heroicon;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 
 /**
@@ -176,22 +177,25 @@ class RegistrationPage extends Page
     {
         $state = $this->form->getState();
 
-        $record = RegistrationForm::query()->ordered()->first() ?? new RegistrationForm;
-        $record->fill([
-            'title' => $state['title'],
-            'cover_image' => $state['cover_image'] ?? null,
-            'description' => $state['description'] ?? null,
-            'form_url' => $state['form_url'],
-            'responses_url' => $state['responses_url'] ?? null,
-            'opens_at' => $state['opens_at'] ?? null,
-            'closes_at' => $state['closes_at'] ?? null,
-            'is_active' => (bool) ($state['is_active'] ?? true),
-            'sort_order' => 1,
-        ]);
-        $record->save();
+        DB::transaction(function () use ($state): void {
+            $record = RegistrationForm::query()->ordered()->first() ?? new RegistrationForm;
+            $record->fill([
+                'title' => $state['title'],
+                'cover_image' => $state['cover_image'] ?? null,
+                'description' => $state['description'] ?? null,
+                'form_url' => $state['form_url'],
+                'responses_url' => $state['responses_url'] ?? null,
+                'opens_at' => $state['opens_at'] ?? null,
+                'closes_at' => $state['closes_at'] ?? null,
+                'is_active' => (bool) ($state['is_active'] ?? true),
+                'sort_order' => 1,
+            ]);
+            $record->save();
 
-        // Ensure only a single registration form record exists in the database
-        RegistrationForm::query()->where('id', '!=', $record->id)->delete();
+            RegistrationForm::query()->whereKeyNot($record->id)->eachById(function (RegistrationForm $redundantForm): void {
+                $redundantForm->delete();
+            });
+        });
 
         Notification::make()
             ->title('Formulir pendaftaran berhasil disimpan.')
