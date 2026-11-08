@@ -147,8 +147,11 @@
                                     $inputName = $field['input_name'];
                                     $inputId = 'field_' . $field['id'];
                                     $isRequired = (bool) $field['required'];
-                                    $type = $field['type'];
+                                    $fieldType = $field['type'];
                                     $options = $field['options'] ?? [];
+                                    $oldValue = old($inputName);
+                                    $oldTextValue = is_scalar($oldValue) ? (string) $oldValue : '';
+                                    $fieldError = $errors->first($inputName) ?: $errors->first($inputName . '.*');
                                 @endphp
 
                                 <div class="flex flex-col">
@@ -163,28 +166,28 @@
                                         <p class="text-[12.5px] text-gray-500 -mt-1 mb-2 leading-relaxed">{{ $field['description'] }}</p>
                                     @endif
 
-                                    @if($type === 'textarea')
+                                    @if($fieldType === 'textarea')
                                         <textarea
                                             id="{{ $inputId }}"
                                             name="{{ $inputName }}"
                                             rows="3"
                                             placeholder="{{ $field['placeholder'] }}"
                                             @if($isRequired) required @endif
-                                            class="w-full rounded-xl border @error($inputName) border-red-400 bg-red-50/30 @else border-gray-200 bg-gray-50/50 hover:border-gray-300 focus:bg-white focus:border-[#16a34a] @enderror px-4 py-3 text-[14px] text-[#181e2b] placeholder-gray-400 focus:ring-3 focus:ring-green-500/15 focus:outline-none transition"
-                                        >{{ old($inputName) }}</textarea>
-                                    @elseif($type === 'select')
+                                            class="w-full rounded-xl border @if($fieldError) border-red-400 bg-red-50/30 @else border-gray-200 bg-gray-50/50 hover:border-gray-300 focus:bg-white focus:border-[#16a34a] @endif px-4 py-3 text-[14px] text-[#181e2b] placeholder-gray-400 focus:ring-3 focus:ring-green-500/15 focus:outline-none transition"
+                                        >{{ $oldTextValue }}</textarea>
+                                    @elseif($fieldType === 'select')
                                         <select
                                             id="{{ $inputId }}"
                                             name="{{ $inputName }}"
                                             @if($isRequired) required @endif
-                                            class="w-full rounded-xl border @error($inputName) border-red-400 bg-red-50/30 @else border-gray-200 bg-gray-50/50 hover:border-gray-300 focus:bg-white focus:border-[#16a34a] @enderror px-4 py-3 text-[14px] text-[#181e2b] focus:ring-3 focus:ring-green-500/15 focus:outline-none transition"
+                                            class="w-full rounded-xl border @if($fieldError) border-red-400 bg-red-50/30 @else border-gray-200 bg-gray-50/50 hover:border-gray-300 focus:bg-white focus:border-[#16a34a] @endif px-4 py-3 text-[14px] text-[#181e2b] focus:ring-3 focus:ring-green-500/15 focus:outline-none transition"
                                         >
                                             <option value="">-- Pilih {{ $field['label'] }} --</option>
                                             @foreach($options as $option)
-                                                <option value="{{ $option }}" @selected(old($inputName) === $option)>{{ $option }}</option>
+                                                <option value="{{ $option }}" @selected($oldTextValue === $option)>{{ $option }}</option>
                                             @endforeach
                                         </select>
-                                    @elseif($type === 'radio')
+                                    @elseif($fieldType === 'radio')
                                         <div class="grid grid-cols-1 {{ count($options) > 1 ? 'sm:grid-cols-2' : '' }} gap-3">
                                             @foreach($options as $idx => $option)
                                                 <label class="group flex items-center gap-3 px-4 py-3 rounded-xl border border-gray-200 bg-gray-50/50 hover:bg-emerald-50/40 hover:border-emerald-300 has-[:checked]:border-[#16a34a] has-[:checked]:bg-[#ecfdf5]/70 cursor-pointer transition">
@@ -192,7 +195,7 @@
                                                         type="radio"
                                                         name="{{ $inputName }}"
                                                         value="{{ $option }}"
-                                                        @checked(old($inputName) === $option)
+                                                        @checked($oldTextValue === $option)
                                                         @if($isRequired && $idx === 0) required @endif
                                                         class="w-4 h-4 text-[#16a34a] border-gray-300 focus:ring-[#16a34a] shrink-0"
                                                     >
@@ -200,9 +203,9 @@
                                                 </label>
                                             @endforeach
                                         </div>
-                                    @elseif($type === 'checkbox')
+                                    @elseif($fieldType === 'checkbox')
                                         @php
-                                            $oldValues = is_array(old($inputName)) ? old($inputName) : [];
+                                            $oldValues = is_array($oldValue) ? $oldValue : [];
                                         @endphp
                                         <div class="grid grid-cols-1 {{ count($options) > 1 ? 'sm:grid-cols-2' : '' }} gap-3">
                                             @foreach($options as $option)
@@ -221,18 +224,18 @@
                                     @else
                                         <input
                                             id="{{ $inputId }}"
-                                            type="{{ in_array($type, ['email', 'tel', 'date', 'time'], true) ? $type : 'text' }}"
+                                            type="{{ in_array($fieldType, ['email', 'tel'], true) ? $fieldType : 'text' }}"
                                             name="{{ $inputName }}"
-                                            value="{{ old($inputName) }}"
+                                            value="{{ $oldTextValue }}"
                                             placeholder="{{ $field['placeholder'] }}"
                                             @if($isRequired) required @endif
-                                            class="w-full rounded-xl border @error($inputName) border-red-400 bg-red-50/30 @else border-gray-200 bg-gray-50/50 hover:border-gray-300 focus:bg-white focus:border-[#16a34a] @enderror px-4 py-3 text-[14px] text-[#181e2b] placeholder-gray-400 focus:ring-3 focus:ring-green-500/15 focus:outline-none transition"
+                                            class="w-full rounded-xl border @if($fieldError) border-red-400 bg-red-50/30 @else border-gray-200 bg-gray-50/50 hover:border-gray-300 focus:bg-white focus:border-[#16a34a] @endif px-4 py-3 text-[14px] text-[#181e2b] placeholder-gray-400 focus:ring-3 focus:ring-green-500/15 focus:outline-none transition"
                                         >
                                     @endif
 
-                                    @error($inputName)
-                                        <p class="mt-1.5 text-[12.5px] font-medium text-red-600">{{ $message }}</p>
-                                    @enderror
+                                    @if($fieldError)
+                                        <p role="alert" class="mt-1.5 text-[12.5px] font-medium text-red-600">{{ $fieldError }}</p>
+                                    @endif
                                 </div>
                             @endforeach
                         </div>

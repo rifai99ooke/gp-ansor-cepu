@@ -13,7 +13,7 @@ use Throwable;
 
 class GoogleFormSchemaService
 {
-    private const SCHEMA_CACHE_PREFIX = 'google_form_schema_v2_';
+    private const SCHEMA_CACHE_PREFIX = 'google_form_schema_v4_';
 
     /**
      * Extract form schema (title, description, fields) from a RegistrationForm's Google Form URL.
@@ -76,6 +76,8 @@ class GoogleFormSchemaService
 
     /**
      * Parse raw Google Form HTML containing FB_PUBLIC_LOAD_DATA_ into our normalized schema array.
+     * Date and time questions require Google's component fields and subtype metadata, so forms
+     * containing them use the original Google Form rather than a partial native schema.
      *
      * @return array{
      *     title: ?string,
@@ -122,8 +124,19 @@ class GoogleFormSchemaService
             $typeCode = isset($item[3]) && is_int($item[3]) ? $item[3] : null;
             $inputs = $item[4] ?? null;
 
-            if ($label === '' || ! is_array($inputs) || ! isset($inputs[0]) || ! is_array($inputs[0])) {
+            if (in_array($typeCode, [6, 11, 12], true)) {
                 continue;
+            }
+
+            if (
+                ! in_array($typeCode, [0, 1, 2, 3, 4], true)
+                || $label === ''
+                || ! is_array($inputs)
+                || count($inputs) !== 1
+                || ! isset($inputs[0])
+                || ! is_array($inputs[0])
+            ) {
+                return null;
             }
 
             $firstInput = $inputs[0];
@@ -300,8 +313,6 @@ class GoogleFormSchemaService
             2 => 'radio',
             3 => 'select',
             4 => 'checkbox',
-            9 => 'date',
-            10 => 'time',
             default => $this->resolveTextSubtype($label, $firstInput),
         };
     }

@@ -40,6 +40,7 @@ class PostController extends Controller
             'popularPosts' => $popularPosts,
             'latestPosts' => $latestPosts,
             'searchQuery' => $searchQuery,
+            'canonical' => $request->canonicalUrl(),
         ]);
     }
 

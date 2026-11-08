@@ -26,6 +26,11 @@
         <priority>0.8</priority>
     </url>
     <url>
+        <loc>{{ route('ranting.index') }}</loc>
+        <changefreq>monthly</changefreq>
+        <priority>0.8</priority>
+    </url>
+    <url>
         <loc>{{ route('galeri.index') }}</loc>
         <changefreq>weekly</changefreq>
         <priority>0.8</priority>
@@ -73,6 +78,15 @@
         <url>
             <loc>{{ route('badan-lembaga.show', $body->slug) }}</loc>
             <lastmod>{{ ($body->updated_at ?? now())->toAtomString() }}</lastmod>
+            <changefreq>monthly</changefreq>
+            <priority>0.6</priority>
+        </url>
+    @endforeach
+
+    @foreach($rantings as $ranting)
+        <url>
+            <loc>{{ route('ranting.show', $ranting->slug) }}</loc>
+            <lastmod>{{ ($ranting->updated_at ?? now())->toAtomString() }}</lastmod>
             <changefreq>monthly</changefreq>
             <priority>0.6</priority>
         </url>

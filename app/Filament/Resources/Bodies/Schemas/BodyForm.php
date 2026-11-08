@@ -28,9 +28,9 @@ class BodyForm
                             ->label('Logo / Lambang')
                             ->disk('public')
                             ->directory('bodies')
-                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp', 'image/svg+xml'])
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(4096)
-                            ->helperText('Format SVG, PNG, WebP, atau JPG (maks. 4 MB).')
+                            ->helperText('Format PNG, WebP, atau JPG (maks. 4 MB).')
                             ->columnSpanFull(),
 
                         RichEditor::make('description')

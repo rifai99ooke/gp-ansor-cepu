@@ -51,6 +51,8 @@ class HtmlSanitizerService
             ->allowElement('tr', ['class'])
             ->allowElement('th', ['class', 'colspan', 'rowspan', 'scope'])
             ->allowElement('td', ['class', 'colspan', 'rowspan'])
+            ->allowAttribute('style', ['p', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6'])
+            ->withAttributeSanitizer(new TextAlignmentAttributeSanitizer)
             ->allowLinkSchemes(['http', 'https', 'mailto', 'tel'])
             ->allowMediaSchemes(['http', 'https', 'data'])
             ->allowRelativeLinks()

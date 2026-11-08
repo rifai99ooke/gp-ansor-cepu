@@ -91,21 +91,21 @@ class SettingsPage extends Page
                                             ->label('Logo Organisasi')
                                             ->disk('public')
                                             ->directory('branding')
-                                            ->acceptedFileTypes(['image/svg+xml', 'image/png', 'image/webp', 'image/jpeg'])
+                                            ->acceptedFileTypes(['image/png', 'image/webp', 'image/jpeg'])
                                             ->maxSize(4096)
                                             ->imagePreviewHeight('160')
                                             ->extraAttributes(['class' => 'gp-settings-logo-upload'])
-                                            ->helperText('Format SVG, PNG, WebP, atau JPG (maks. 4 MB).'),
+                                            ->helperText('Format PNG, WebP, atau JPG (maks. 4 MB).'),
 
                                         FileUpload::make('site_favicon')
                                             ->label('Ikon Situs (Favicon)')
                                             ->disk('public')
                                             ->directory('branding')
-                                            ->acceptedFileTypes(['image/svg+xml', 'image/png', 'image/webp', 'image/x-icon'])
+                                            ->acceptedFileTypes(['image/png', 'image/webp', 'image/x-icon'])
                                             ->maxSize(2048)
                                             ->imagePreviewHeight('32')
                                             ->extraAttributes(['class' => 'gp-settings-favicon-upload'])
-                                            ->helperText('Ditampilkan di tab browser. Pratinjau setinggi 32 px. Format PNG, SVG, ICO, atau WebP (maks. 2 MB).'),
+                                            ->helperText('Ditampilkan di tab browser. Pratinjau setinggi 32 px. Format PNG, ICO, atau WebP (maks. 2 MB).'),
                                     ])
                                     ->columns(2),
 

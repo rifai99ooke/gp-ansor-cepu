@@ -28,4 +28,11 @@ class PostFilterRequest extends FormRequest
     {
         return trim((string) $this->validated('q', ''));
     }
+
+    public function canonicalUrl(): string
+    {
+        $page = (int) $this->validated('page', 1);
+
+        return url()->query($this->url(), $page > 1 ? ['page' => $page] : []);
+    }
 }

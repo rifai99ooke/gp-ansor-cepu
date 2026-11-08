@@ -346,6 +346,10 @@ class RegistrationFormTest extends TestCase
             'login page' => [200, '<html><body>Sign in to Google</body></html>'],
             'invalid JSON' => [200, '<script>var FB_PUBLIC_LOAD_DATA_ = [invalid];</script>'],
             'missing fields' => [200, '<script>var FB_PUBLIC_LOAD_DATA_ = [null,["Deskripsi",[]]];</script>'],
+            'grid with multiple rows' => [200, '<script>var FB_PUBLIC_LOAD_DATA_ = [null,["Deskripsi",[[123,"Ketersediaan",null,7,[[456,[["Ya"],["Tidak"]],1,["Senin"]],[789,[["Ya"],["Tidak"]],1,["Selasa"]]]]],null,null,null,null,null,null,"Pendaftaran"]];</script>'],
+            'unsupported question alongside a supported field' => [200, '<script>var FB_PUBLIC_LOAD_DATA_ = [null,["Deskripsi",[[123,"Nama",null,0,[[456,null,1]]],[789,"Berkas",null,13,[[999,null,1]]]],null,null,null,null,null,null,"Pendaftaran"]];</script>'],
+            'date or datetime question alongside a supported field' => [200, '<script>var FB_PUBLIC_LOAD_DATA_ = [null,["Deskripsi",[[123,"Nama",null,0,[[456,null,1]]],[789,"Tanggal Kegiatan",null,9,[[999,null,1]]]],null,null,null,null,null,null,"Pendaftaran"]];</script>'],
+            'time or duration question alongside a supported field' => [200, '<script>var FB_PUBLIC_LOAD_DATA_ = [null,["Deskripsi",[[123,"Nama",null,0,[[456,null,1]]],[789,"Waktu Kegiatan",null,10,[[999,null,1]]]],null,null,null,null,null,null,"Pendaftaran"]];</script>'],
         ];
     }
 
@@ -396,12 +400,13 @@ class RegistrationFormTest extends TestCase
         ];
     }
 
-    public function test_legacy_cached_fallback_fields_are_not_reused(): void
+    #[DataProvider('legacySchemaCachePrefixes')]
+    public function test_legacy_cached_fallback_fields_are_not_reused(string $prefix): void
     {
         config(['cache.default' => 'database']);
         Http::preventStrayRequests();
         $this->createSubmissionForm();
-        Cache::put('google_form_schema_'.md5('https://docs.google.com/forms/d/e/SubmissionTest/viewform'), [
+        Cache::put($prefix.md5('https://docs.google.com/forms/d/e/SubmissionTest/viewform'), [
             'title' => 'Informasi Kontak',
             'description' => null,
             'action_url' => 'https://docs.google.com/forms/d/e/SubmissionTest/formResponse',
@@ -428,6 +433,18 @@ class RegistrationFormTest extends TestCase
             ->assertDontSee('name="entry_', false);
 
         Http::assertSentCount(1);
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public static function legacySchemaCachePrefixes(): array
+    {
+        return [
+            'fallback schema' => ['google_form_schema_'],
+            'schema without question compatibility checks' => ['google_form_schema_v2_'],
+            'schema without date and time compatibility checks' => ['google_form_schema_v3_'],
+        ];
     }
 
     public function test_saving_registration_invalidates_the_cached_schema(): void

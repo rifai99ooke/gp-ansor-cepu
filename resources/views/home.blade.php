@@ -122,7 +122,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-                    @foreach($rantings->take(3) as $ranting)
+                    @foreach($rantings as $ranting)
                         @php $rcoverUrl = $ranting->coverUrl(800); @endphp
                         <a
                             href="{{ route('ranting.show', $ranting->slug) }}"

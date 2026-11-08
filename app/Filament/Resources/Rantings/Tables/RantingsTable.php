@@ -8,6 +8,7 @@ use Filament\Actions\Action;
 use Filament\Actions\DeleteAction;
 use Filament\Actions\EditAction;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\ViewColumn;
 use Filament\Tables\Table;
 
 class RantingsTable
@@ -24,6 +25,12 @@ class RantingsTable
             ->reorderRecordsTriggerAction(fn (Action $action): Action => $action->hidden())
             ->defaultSort('sort_order')
             ->columns([
+                ViewColumn::make('drag_handle')
+                    ->label('')
+                    ->view('filament.tables.columns.drag-handle')
+                    ->disabledClick()
+                    ->width('48px'),
+
                 TextColumn::make('name')
                     ->label('Nama Ranting'),
 

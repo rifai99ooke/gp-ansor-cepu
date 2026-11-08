@@ -23,6 +23,7 @@ class GalleryController extends Controller
         return view('galleries.index', [
             'galleries' => $galleries,
             'searchQuery' => $searchQuery,
+            'canonical' => $request->canonicalUrl(),
         ]);
     }
 }

@@ -64,6 +64,17 @@ class OfficerPageTest extends TestCase
             ->assertSee('Budi Santoso');
     }
 
+    public function test_officer_index_filters_by_period_like_the_live_search(): void
+    {
+        Officer::factory()->create(['name' => 'Pengurus Periode Sekarang', 'period' => '2024 - 2029']);
+        Officer::factory()->create(['name' => 'Pengurus Periode Lama', 'period' => '2019 - 2023']);
+
+        $this->get('/profil/struktur-organisasi?q=2024')
+            ->assertOk()
+            ->assertSee('Pengurus Periode Sekarang')
+            ->assertDontSee('Pengurus Periode Lama');
+    }
+
     public function test_officer_show_returns_404_for_nonexistent_slug(): void
     {
         $this->get('/profil/struktur-organisasi/slug-tidak-ada')

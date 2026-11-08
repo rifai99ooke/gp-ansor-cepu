@@ -69,7 +69,7 @@ class Officer extends Model
      */
     public function scopeSearch(Builder $query, ?string $term): Builder
     {
-        return $this->applyLikeSearch($query, $term, ['name', 'position']);
+        return $this->applyLikeSearch($query, $term, ['name', 'position', 'period']);
     }
 
     public function photoUrl(?int $width = null): ?string

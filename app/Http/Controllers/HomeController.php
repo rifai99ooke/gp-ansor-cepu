@@ -43,6 +43,7 @@ class HomeController extends Controller
         $rantings = Ranting::query()
             ->withCount('members')
             ->ordered()
+            ->limit(3)
             ->get();
 
         return view('home', [
@@ -50,9 +51,10 @@ class HomeController extends Controller
             'latestPosts' => $latestPosts,
             'popularPosts' => $popularPosts,
             'searchQuery' => $searchQuery,
+            'canonical' => $request->canonicalUrl(),
             'hasActiveRegistration' => $hasActiveRegistration,
             'rantings' => $rantings,
-            'rantingCount' => $rantings->count(),
+            'rantingCount' => Ranting::query()->count(),
         ]);
     }
 }

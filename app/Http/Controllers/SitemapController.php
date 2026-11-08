@@ -8,6 +8,7 @@ use App\Enums\PostType;
 use App\Models\Body;
 use App\Models\Officer;
 use App\Models\Post;
+use App\Models\Ranting;
 use Illuminate\Http\Response;
 
 class SitemapController extends Controller
@@ -29,11 +30,16 @@ class SitemapController extends Controller
             ->select(['id', 'slug', 'updated_at', 'sort_order'])
             ->ordered()
             ->get();
+        $rantings = Ranting::query()
+            ->select(['id', 'slug', 'updated_at', 'sort_order'])
+            ->ordered()
+            ->get();
 
         $content = view('sitemap', [
             'posts' => $posts,
             'officers' => $officers,
             'bodies' => $bodies,
+            'rantings' => $rantings,
         ])->render();
 
         return response($content, 200, [

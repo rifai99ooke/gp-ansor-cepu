@@ -35,6 +35,7 @@ class GalleryForm
                             ->disk('public')
                             ->directory('galleries')
                             ->image()
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->maxSize(6144)
                             ->required()
                             ->helperText('Unggah foto dokumentasi (rasio 16:9 disarankan, maks. 6 MB).')
