@@ -38,7 +38,7 @@ class Gallery extends Model
             $gallery->ensureUniqueSlug('title');
 
             if (! $gallery->exists && blank($gallery->sort_order)) {
-                $gallery->sort_order = ((int) static::query()->max('sort_order')) + 1;
+                $gallery->sort_order = ((int) static::query()->min('sort_order')) - 1;
             }
         });
 

@@ -258,6 +258,10 @@
         box-shadow: 0 0 0 3px rgba(22, 163, 74, 0.15) !important;
     }
 
+    .fi-resource-posts .fi-fo-rich-editor .tiptap > p + p {
+        margin-top: 0;
+    }
+
     /* 7. Login Page (.fi-simple-layout) — Identical to Public Registration Card */
     .fi-simple-layout {
         background: var(--gp-bg-gradient) !important;

@@ -89,7 +89,7 @@
             </div>
 
             {{-- Body in prose with green links --}}
-            <div class="mt-8 prose prose-slate max-w-none prose-headings:text-[#181e2b] prose-headings:font-bold prose-p:text-gray-700 prose-p:leading-relaxed prose-a:text-[#16a34a] hover:prose-a:text-[#15803d] prose-blockquote:border-l-[#16a34a] prose-blockquote:bg-[#ecfdf5]/50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg">
+            <div class="mt-8 prose prose-slate max-w-none prose-headings:text-[#181e2b] prose-headings:font-bold prose-p:my-0 prose-p:min-h-lh prose-p:text-gray-700 prose-p:leading-normal prose-a:text-[#16a34a] hover:prose-a:text-[#15803d] prose-blockquote:border-l-[#16a34a] prose-blockquote:bg-[#ecfdf5]/50 prose-blockquote:py-2 prose-blockquote:px-4 prose-blockquote:rounded-r-lg">
                 {!! $post->content !!}
             </div>
 
